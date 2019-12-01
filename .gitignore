@@ -82,3 +82,5 @@ venv.bak/
 
 # custom
 *.pdf
+*.tsv
+*.csv
