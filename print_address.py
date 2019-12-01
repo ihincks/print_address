@@ -12,14 +12,18 @@ from reportlab.lib.pagesizes import letter, inch
 class RowData:
     def __init__(self, *, n_cols):
         self.n_cols = n_cols
-        self.rows = [[]]
+        self._rows = [[]]
 
     def add(self, entry):
-        row = self.rows[-1]
+        row = self._rows[-1]
         if len(row) == self.n_cols:
             row = []
-            self.rows.append(row)
+            self._rows.append(row)
         row.append(entry.format())
+
+    @property
+    def rows(self):
+        return self._rows
 
 
 class Entry:
@@ -31,18 +35,21 @@ class Entry:
         lines = "<br/>".join(x.strip() for x in self.lines)
         return reportlab.platypus.Paragraph(lines, self.style)
 
+
 parser = argparse.ArgumentParser(prog="print address")
 parser.add_argument("tsvfile", help="TSV to parse.")
 parser.add_argument("-o", "--out", default="addresses.pdf", help="Output PDF file.")
 
-parser.add_argument("--width", default=2, help="Width of each cell")
-parser.add_argument("--height", default=0.75, help="Height of each cell")
-parser.add_argument("--page-width", default=8.5, help="Width of page")
-parser.add_argument("--page-height", default=11, help="Height of page")
-parser.add_argument("--font-size", default=8, help="Font size")
-parser.add_argument("--margin", default=0.25, help="Margin of page")
+parser.add_argument("--width", default=2, type=float, help="Width of each cell")
+parser.add_argument("--height", default=0.75, type=float, help="Height of each cell")
+parser.add_argument("--page-width", default=8.5, type=float, help="Width of page")
+parser.add_argument("--page-height", default=11, type=float, help="Height of page")
+parser.add_argument("--font-size", default=8, type=float, help="Font size")
+parser.add_argument("--margin", default=0.25, type=float, help="Margin of page")
 parser.add_argument("--grid", action="store_true", help="Grid between entries")
-parser.add_argument("--repeat", default=1, help="Number of times to repeat addresses")
+parser.add_argument(
+    "--repeat", default=1, type=int, help="Number of times to repeat addresses"
+)
 
 
 if __name__ == "__main__":
@@ -55,7 +62,7 @@ if __name__ == "__main__":
         parent=rll.styles.getSampleStyleSheet()["Normal"],
         fontSize=args.font_size,
         leading=args.font_size * 1.05,
-        alignment=rll.enums.TA_CENTER
+        alignment=rll.enums.TA_CENTER,
     )
 
     # parse and store data
